@@ -236,19 +236,31 @@ A pesquisa atual (maio/2026) sobre compatibilidade de softwares profissionais em
 | Unreal Engine 5 | ✅ | — | Linux nativo |
 
 ### Decisão
-- **After Effects, 3ds Max, SolidWorks:** usar Windows do dual boot, sem tentativas em Linux
-- **Photoshop:** experimentar Wine patched em milestone futuro (não-crítico)
+- **After Effects, 3ds Max, SolidWorks, Photoshop:** usar Windows do dual boot, sem tentativas em Linux
 - **AutoCAD:** Web no Edge para uso casual, Windows para uso pesado
 - **Substance Painter, Blender, Unreal 5:** Linux nativo (decisão fácil)
+- **Edição de imagem em Linux (substituto parcial de Photoshop):** Krita (pintura/ilustração) e GIMP (edição básica) — cobrem ~80% dos casos não-profissionais
 
 ### Justificativa
-Tempo gasto tentando rodar After Effects ou SolidWorks via Wine seria perdido. Ambos têm mecanismos profundos do Windows que Wine não cobre. A pesquisa ATUAL confirma que o status não mudou em anos.
+Tempo gasto tentando rodar After Effects, SolidWorks, 3ds Max ou Photoshop via Wine seria perdido — todos têm mecanismos profundos do Windows que Wine não cobre de forma estável. O Wine patched de janeiro/2026 chega a abrir versões antigas de Photoshop (PS 2021/2025), mas exige build manual e não tem garantia de estabilidade para uso profissional. Para edição pesada de imagem em Linux, Krita e GIMP cobrem o suficiente; o restante vai para o Windows do dual boot. A pesquisa atual confirma que o status não mudou em anos.
+
+**Atualização 02/05/2026 (v2 do projeto):** Photoshop via Wine **cancelado como objetivo** por escolha do usuário. Adobe e Autodesk = Windows. Krita/GIMP cobrem o casual em Linux.
 
 ---
 
 ## Próximas decisões pendentes
 
-- **D-009:** Estratégia de dotfiles (chezmoi vs GNU Stow vs solução custom) — decidir antes de M1
-- **D-010:** DAW para gravação de música (Reaper proprietário vs Ardour open source) — decidir em M1
-- **D-011:** Estratégia de backup pessoal (rsync, restic, BorgBackup) — decidir em M1
-- **D-012:** Modelo de Adobe via Wine (PhialsBasement patched vs Bottles vanilla) — decidir em M-experimental futuro
+- **D-009:** Estratégia de dotfiles (chezmoi vs GNU Stow vs solução custom) — decidir antes de M1.5
+- **D-010:** DAW para gravação de música (Reaper proprietário vs Ardour open source) — decidir antes de M1.6
+
+---
+
+## Decisões canceladas / removidas
+
+> Para histórico — itens que **estavam** na lista de pendências mas foram retirados para não poluir o roadmap.
+
+- **D-011 — Estratégia de backup pessoal (rsync, restic, BorgBackup)**
+  Cancelada em 02/05/2026 a pedido do usuário. Será endereçada *ad-hoc* quando surgir necessidade real (provavelmente via `rsync` para o SSK externo ou pasta NTFS compartilhada). Não é objetivo formal do projeto.
+
+- **D-012 — Modelo de Adobe via Wine (PhialsBasement vs Bottles)**
+  Cancelada em 02/05/2026 a pedido do usuário. Coerente com a atualização da D-008: Adobe = Windows. Sem tentativa de rodar Photoshop via Wine.

@@ -90,6 +90,7 @@ Detalhes de cada milestone em [docs/milestones.md](docs/milestones.md).
 
 ```
 workstation-ai-3d/
+├── STATE.md               ← 🧭 GPS do projeto (LER PRIMEIRO em qualquer chat novo)
 ├── README.md              ← este arquivo (visão geral)
 ├── LICENSE                ← MIT
 ├── .gitignore
@@ -110,11 +111,12 @@ workstation-ai-3d/
 
 Leia nessa ordem:
 
-1. Este `README.md` (você está aqui)
-2. [`docs/decisoes.md`](docs/decisoes.md) — entenda o porquê de cada escolha
-3. [`docs/milestones.md`](docs/milestones.md) — veja o plano completo
-4. [`docs/glossario.md`](docs/glossario.md) — referência de termos
-5. Documentos `m0-*.md` — passos executáveis do milestone atual
+1. [`STATE.md`](STATE.md) — **GPS do projeto** (onde estamos agora; sempre o ponto de entrada)
+2. Este `README.md` (visão geral e contexto)
+3. [`docs/decisoes.md`](docs/decisoes.md) — entenda o porquê de cada escolha
+4. [`docs/milestones.md`](docs/milestones.md) — veja o plano completo
+5. [`docs/glossario.md`](docs/glossario.md) — referência de termos
+6. Documentos `docs/m0-*.md` — passos executáveis do milestone atual
 
 ### Se você é o autor do projeto
 

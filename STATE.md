@@ -2,8 +2,8 @@
 
 > 🧭 **Este é o GPS do projeto.** Ponto de entrada para qualquer chat novo (com IA ou colaborador humano). Sempre atualizado ao final de cada sessão de trabalho.
 >
-> **📅 Última atualização:** 02/05/2026 (TODOs explícitos do usuário registrados)
-> **🔢 Versão do estado:** 2
+> **📅 Última atualização:** 02/05/2026 (auditoria + cleanup: D-008 fechada para Photoshop=Windows; D-011 e D-012 removidas; convenção de naming PK↔repo documentada)
+> **🔢 Versão do estado:** 3
 > **🎯 Milestone atual:** M0 — Setup base do dual boot
 > **📍 Sub-passo atual:** Pronto para iniciar M0.1
 
@@ -57,6 +57,13 @@ Estamos no início da fase de execução do projeto. Toda a arquitetura foi deci
 - [x] Distro Kubuntu 24.04 LTS reafirmada (D-001 mantida — decisão Nobara não reaberta)
 - [x] TODOs explícitos do usuário registrados nesta versão (Edge, emuladores, descompactação, Git Linux, DAW, dotfiles)
 - [x] `milestones.md` atualizado para incluir Edge (M1.1), descompactação+Git (M0.5) e nova seção M1.9 (emuladores)
+- [x] **Auditoria + cleanup de ADRs (02/05/2026, v3 do STATE):**
+  - D-008 atualizada: **Photoshop = só Windows** (sem tentativa via Wine); Krita/GIMP cobrem o casual em Linux
+  - **D-011 (backup pessoal) cancelada** — backup será ad-hoc via `rsync`/SSK quando necessário
+  - **D-012 (Adobe via Wine) cancelada** — coerente com D-008 atualizada
+  - `m0-windows-tweaks.md`: corrigido "4 ajustes" → "5 ajustes"
+  - `README.md`: STATE.md adicionado na estrutura e na ordem de leitura
+  - **Convenção de naming PK↔repo documentada** (ver seção dedicada abaixo)
 
 ---
 
@@ -158,6 +165,29 @@ A IA vai automaticamente:
 4. Esperar sua ordem para prosseguir
 
 Sem isso, a IA pode acabar refazendo decisões já tomadas ou pulando contexto importante.
+
+---
+
+## 🗂️ Convenção de nomes (project knowledge ↔ repositório GitHub)
+
+O **project knowledge** do Claude não permite nomes de arquivo duplicados (não tem hierarquia de pastas). Como o repositório tem dois `README.md` (um na raiz e um em `cheatsheet/`), foi necessário renomear ao subir no PK. **No repositório GitHub os nomes seguem a árvore normal**; no PK eles ganham um sufixo descritivo.
+
+| Nome no PK (Claude) | Caminho no repo (GitHub) | Função |
+|---|---|---|
+| `STATE.md` | `STATE.md` | GPS do projeto (mesmo nome) |
+| `README-projeto.md` | `README.md` | README raiz do repo |
+| `README-cheatsheet.md` | `cheatsheet/README.md` | Cheatsheet de comandos |
+| `decisoes.md` | `docs/decisoes.md` | ADRs |
+| `milestones.md` | `docs/milestones.md` | Roadmap |
+| `glossario.md` | `docs/glossario.md` | Glossário |
+| `m0-windows-tweaks.md` | `docs/m0-windows-tweaks.md` | Doc do M0.1 |
+| `p16v.LOG` | `p16v.LOG` (ou pasta `hardware/`) | Log HWiNFO |
+
+**Regra prática ao editar:**
+
+- **Para subir no PK do Claude:** usar o nome com sufixo (`README-projeto.md`, `README-cheatsheet.md`).
+- **Para commitar no repo GitHub:** usar o caminho com pasta (`README.md`, `cheatsheet/README.md`, `docs/...`).
+- **Os arquivos com sufixo são SOMENTE convenção do PK.** Em qualquer link, citação ou comando, sempre referenciar pelo nome no repositório.
 
 ---
 

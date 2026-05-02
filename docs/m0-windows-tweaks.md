@@ -12,7 +12,7 @@
 
 Antes de instalar o Linux, precisamos **configurar o Windows** para que ele se comporte bem ao dividir o computador com o Linux. Sem essas configurações, problemas como **corrupção de arquivos compartilhados** ou **menu de boot que não aparece** podem acontecer.
 
-São 4 ajustes principais:
+São 5 ajustes principais:
 
 1. **Desabilitar Fast Startup** — para o Windows fechar de verdade ao desligar
 2. **Desabilitar Hibernação** — pelo mesmo motivo
