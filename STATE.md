@@ -2,8 +2,8 @@
 
 > 🧭 **Este é o GPS do projeto.** Ponto de entrada para qualquer chat novo (com IA ou colaborador humano). Sempre atualizado ao final de cada sessão de trabalho.
 >
-> **📅 Última atualização:** 02/05/2026 (criação inicial)
-> **🔢 Versão do estado:** 1
+> **📅 Última atualização:** 02/05/2026 (TODOs explícitos do usuário registrados)
+> **🔢 Versão do estado:** 2
 > **🎯 Milestone atual:** M0 — Setup base do dual boot
 > **📍 Sub-passo atual:** Pronto para iniciar M0.1
 
@@ -51,6 +51,13 @@ Estamos no início da fase de execução do projeto. Toda a arquitetura foi deci
 - [x] Primeiro commit: hash `6544717`, 8 arquivos, 1.421 insertions
 - [x] Push para GitHub: https://github.com/madlabnexus/workstation-ai-3d (público)
 
+### Fase de início da execução (em andamento)
+
+- [x] Sessão de retomada via chat novo: STATE/decisoes/milestones lidos e confirmados
+- [x] Distro Kubuntu 24.04 LTS reafirmada (D-001 mantida — decisão Nobara não reaberta)
+- [x] TODOs explícitos do usuário registrados nesta versão (Edge, emuladores, descompactação, Git Linux, DAW, dotfiles)
+- [x] `milestones.md` atualizado para incluir Edge (M1.1), descompactação+Git (M0.5) e nova seção M1.9 (emuladores)
+
 ---
 
 ## 🎯 Próximo passo concreto
@@ -69,6 +76,20 @@ Sequência:
 
 ---
 
+## 🔖 TODOs explícitos do usuário (a slotar em milestones)
+
+Requisitos declarados pelo usuário na abertura do projeto que precisavam ser registrados explicitamente para não esquecer durante a execução. Já foram refletidos em `milestones.md`:
+
+- [ ] **Microsoft Edge para Office 365** → entra em **M1.1** (apps essenciais). Build oficial Edge for Linux disponível como `.deb` direto da Microsoft.
+- [ ] **Emuladores (retro, DOS, Windows antigo)** → **M1.9** (nova seção): RetroArch (consoles retro), DOSBox-Staging (DOS), 86Box ou PCem (PC antigo até Pentium III), QEMU desktop para Win98/XP isolados.
+- [ ] **DAW para gravação de música** → **D-010 pendente** (Reaper proprietário vs Ardour open source). Decidir antes de M1.6.
+- [ ] **Ferramentas de descompactação** (zip, rar, 7z, tar, gz, zstd, xz) → entra em **M0.5** (pós-instalação) via `p7zip-full`, `unrar`, `unzip`, `zstd`, `xz-utils`.
+- [ ] **Git no Linux** → entra em **M0.5** (no Windows já está, falta replicar).
+- [ ] **Dotfiles auto-reinstaláveis** → **D-009 pendente** (chezmoi vs GNU Stow vs custom). Decidir antes de M1.5.
+- [ ] **Bootstrap script idempotente** → já previsto em **M1.4**. Vai consumir os TODOs acima como "lista mestra de pacotes".
+
+---
+
 ## 🧠 Contexto crítico para retomar
 
 ### Sobre o estado real da máquina
@@ -80,7 +101,7 @@ Sequência:
 
 ### Decisões que mudaram durante o planejamento (importante para não confundir)
 
-- **Distro:** mudei de Nobara → Fedora → Kubuntu 24.04 LTS (decisão final)
+- **Distro:** mudei de Nobara → Fedora → Kubuntu 24.04 LTS (decisão final, reafirmada no chat de 02/05)
 - **Backup do Windows:** plano original tinha; decisão final é **NÃO fazer**
 - **Mexer no Windows:** plano final permite tweaks (Fast Startup off etc) **mas sem backup**
 - **Bootloader:** systemd-boot atual será substituído por **GRUB** (decisão por simplicidade)
@@ -158,6 +179,6 @@ Sem isso, a IA pode acabar refazendo decisões já tomadas ou pulando contexto i
 5. Atualizar "Próximo passo concreto"
 6. Revisar "Contexto crítico" (remover o que não é mais relevante, adicionar novidades)
 7. `git add STATE.md && git commit -m "STATE: <resumo da mudança>" && git push`
-8. **Re-upload** no Project Knowledge do Claude
+8. **Re-upload** no Project Knowledge do Claude (ou conectar GitHub MCP — ver abaixo)
 
 **Princípio:** este arquivo deve **caber em uma tela** ao ler em terminal. Se ficou grande demais, mover detalhes históricos para `decisoes.md` ou `milestones.md`.

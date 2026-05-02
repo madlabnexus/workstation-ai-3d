@@ -68,6 +68,8 @@
 - Instalar HWE kernel (`linux-generic-hwe-24.04`)
 - Instalar driver NVIDIA proprietário (PPA `graphics-drivers`)
 - Instalar codecs proprietários (`ubuntu-restricted-extras`)
+- **Instalar Git e ferramentas de desenvolvimento básicas:** `git`, `curl`, `wget`, `build-essential`
+- **Instalar ferramentas de descompactação completas:** `p7zip-full`, `p7zip-rar`, `unrar`, `unzip`, `zip`, `zstd`, `xz-utils`, `tar`, `gzip`, `bzip2`
 - Configurar Snapper para o subvolume `@` (root)
 - Instalar `grub-btrfs` para snapshots no menu de boot
 - **Documento:** `m0-pos-instalacao.md` (a ser criado quando chegar a hora)
@@ -84,6 +86,7 @@
 - ✅ Kubuntu funciona com NVIDIA acelerada
 - ✅ Snapshot Snapper funcional
 - ✅ Sistema apto para uso diário básico (web, terminal, gerenciamento de arquivos)
+- ✅ Git, curl/wget, e descompactadores instalados
 
 ---
 
@@ -93,16 +96,73 @@
 
 **Sub-passos previstos:**
 
-- M1.1 — Apps essenciais (browser, terminal, editor, comunicação)
-- M1.2 — Steam + Proton + jogos
-- M1.3 — Stack de criação: Blender, Unreal Engine 5, Substance Painter
-- M1.4 — Bootstrap script idempotente (instala tudo automaticamente em outra máquina)
-- M1.5 — Dotfiles versionados em git (decisão pendente: chezmoi vs GNU Stow)
-- M1.6 — DAW e gravação de música (decisão pendente: Reaper vs Ardour)
-- M1.7 — Distrobox para experimentos isolados
-- M1.8 — Configuração KDE Plasma personalizada
+### M1.1 — Apps essenciais
+- **Microsoft Edge for Linux** (`.deb` oficial Microsoft) — para Office 365, Teams web, AutoCAD Web
+- **Firefox** — backup browser
+- Terminal: Konsole (já vem) + `tmux` ou `zellij`
+- Editor: VSCode (`.deb` oficial Microsoft)
+- Comunicação: Telegram, Discord, Slack (Flatpak ou `.deb`)
+- Office: LibreOffice (já vem com Kubuntu) + OnlyOffice (alternativa de melhor compatibilidade `.docx`/`.xlsx`)
+- PDF: Okular (já vem) + Master PDF Editor se precisar editar
+- Cliente de email: Thunderbird
 
-**Critério de "M1 concluído":** sistema reproduzível via script + dotfiles, uso confortável diariamente.
+### M1.2 — Steam + Proton + jogos modernos
+- Steam (`steam-installer` ou Flatpak)
+- Proton-GE (via ProtonUp-Qt)
+- Lutris (para jogos non-Steam, GOG, Battle.net)
+- Heroic Games Launcher (Epic Games e GOG)
+- MangoHud + GameMode
+
+### M1.3 — Stack de criação 3D/2D nativa Linux
+- Blender (Flatpak ou tarball oficial)
+- Unreal Engine 5 (Epic Launcher via Heroic ou source build)
+- Substance Painter (build oficial Adobe Linux via portal)
+- Krita (já é nativo, alternativa a Photoshop para pintura)
+- GIMP (alternativa básica a Photoshop)
+- DaVinci Resolve (build oficial Linux — alternativa a Premiere)
+
+### M1.4 — Bootstrap script idempotente
+- Script bash em `bootstrap/install.sh` que instala TUDO automaticamente
+- Lê listas modulares: `apt-packages.txt`, `flatpaks.txt`, `snap-packages.txt`, `manual-debs.txt`
+- Idempotente: rodar de novo não estraga nada, só atualiza
+- Roda em máquina nova após instalação Kubuntu limpa e reproduz todo o ambiente
+- **Critério:** se eu reinstalar Kubuntu do zero, em <30 minutos rodando o script tenho tudo de volta
+
+### M1.5 — Dotfiles versionados em git
+- **D-009 pendente:** chezmoi vs GNU Stow vs solução custom
+- Repo separado `madlabnexus/dotfiles` no GitHub (público ou privado, decidir)
+- Inclui: shell config (bash/zsh), git config, KDE Plasma layouts, configs de apps específicos
+- Integração com bootstrap script
+
+### M1.6 — DAW e gravação de música
+- **D-010 pendente:** Reaper (proprietário, leve, Linux nativo) vs Ardour (open source, robusto)
+- Plugins: LSP Plugins, Calf, x42, Surge XT (sintetizador)
+- Pipewire-jack (já vem por padrão no Kubuntu 24.04+)
+- Drivers ASIO substitutos no Linux: pipewire low-latency
+- Considerar: Carla (host de plugins), Hydrogen (drum machine)
+
+### M1.7 — Distrobox para experimentos isolados
+- Instalar Distrobox + Podman
+- Containers: Arch para AUR, Fedora para testar pacotes RHEL, Alpine para builds minimal
+- Permite testar coisas sem sujar o host
+
+### M1.8 — Configuração KDE Plasma personalizada
+- Tema, ícones, fontes
+- KWin scripts (forçar regras de janela)
+- Atalhos de teclado personalizados
+- Activities (se quiser usar)
+- Latte Dock (se quiser dock estilo macOS)
+
+### M1.9 — Emuladores e jogos retro/legacy
+- **RetroArch** (consoles retro: SNES, Mega Drive, PSX, PS2, GameCube, Switch via Ryujinx, etc.)
+- **DOSBox-Staging** (jogos DOS — versão moderna do DOSBox clássico)
+- **86Box** ou **PCem** (PC antigo até Pentium III com drivers de época)
+- **QEMU** com VMs separadas para Win98/WinXP isolados (jogos antigos que não rodam em Win10/11 modernos)
+- ScummVM (point-and-click clássicos: Monkey Island, Day of the Tentacle)
+- PPSSPP (PSP), Dolphin (GameCube/Wii), PCSX2 (PS2)
+- **Critério:** consigo rodar jogos das eras DOS, Win9x, PSX, PS2, retro consoles sem stress
+
+**Critério de "M1 concluído":** sistema reproduzível via script + dotfiles, uso confortável diariamente, todos os softwares essenciais instalados.
 
 ---
 
