@@ -8,7 +8,7 @@
 
 | # | Milestone | Tempo estimado | Status |
 |---|---|---|---|
-| **M0** | Setup base — dual boot Windows + Kubuntu funcional | 1-3 dias | 🚧 Em progresso |
+| **M0** | Setup base — dual boot Windows + Kubuntu funcional | 1-3 dias | 🚧 Em progresso (M0.1 ✅, M0.2 próximo) |
 | M1 | Linux fluente do dia a dia | 2-6 semanas (uso real) | ⏸️ |
 | M2 | VM Windows básica no Linux (sem GPU) | 1 dia | ⏸️ |
 | M3 | Boot do Windows físico em VM (P2V live) | 2-3 dias | ⏸️ |
@@ -30,39 +30,71 @@
 
 **Sub-passos:**
 
-### M0.1 — Tweaks no Windows (sem backup)
-- Desabilitar Fast Startup
-- Desabilitar Hibernação
-- Verificar status do BitLocker (suspender se ativo)
-- Atualizar BIOS Lenovo se houver versão mais nova que 1.18
-- Verificar configurações gráficas no BIOS (Hybrid Graphics vs Discrete)
-- **Documento:** `m0-windows-tweaks.md`
+### M0.1 — Tweaks no Windows ✅ CONCLUÍDO em 02/05/2026
+
+Sub-passos executados (ordem real, com sub-passos emergentes que apareceram durante execução):
+
+- **M0.1.1** ✅ PowerShell aberto como administrador (validado com `IsInRole(Administrator)`)
+- **M0.1.2** ✅ `powercfg /h off` — desabilitou Fast Startup + Hibernação juntos (~24-32 GB liberados)
+- **M0.1.3** ✅ `powercfg /a` — confirmou Hibernate/Fast Startup/Hybrid Sleep todos em "not available". Modern Standby S0ix ativo (esperado em Meteor Lake)
+- **M0.1.4** ✅ `manage-bde -status` — BitLocker OFF em todos os volumes (C:, D:, E:, F:, VTOYEFI). Sem ação de suspender necessária
+- **M0.1.4.1** ✅ (sub-passo emergente) Mapa real dos discos via `Get-Partition` + `Get-Disk`. **Descoberto que o STATE v4 estava com NVMe1/NVMe2 invertidos**:
+  - Disk 0 = UMIS = Linux (EndeavourOS)
+  - Disk 1 = BIWIN = Windows + D:
+  - Disk 2 = SSK USB = Ventoy + F: (ignorar)
+- **M0.1.5.1** ✅ Versão BIOS atual via `Get-CimInstance Win32_BIOS`: `N44ET35W v1.18` (release 27/08/2025)
+- **M0.1.5.2** ✅ vBIOS NVIDIA atual via `nvidia-smi`: `95.06.31.40.01`, driver `595.71`, subsystem `17AA-232D`
+- **M0.1.5.3.A** ✅ Flash da BIOS principal (`n44uj11w`) — `1.18 → 1.20`. Memory training ~2 min após reboot. Pós-flash: `N44ET37W v1.20` (release 10/12/2025)
+- **M0.1.5.3.B** ✅ (sub-passo emergente) Backup da vBIOS NVIDIA via `nvflash64.exe --save`. Memory Integrity (HVCI) precisou ser desabilitado pra `nvflash64` funcionar (depois reativado). Arquivo de 2 MB salvo em `C:\Users\<user>\bkp-bios\vbios-p16v_bkp-95.06.31.40.01.rom`
+- **M0.1.5.3.C** ✅ Flash da vBIOS NVIDIA (`n44vw02w_v3`) — `.01 → .1c`. Pós-flash: `95.06.31.40.1c`
+- **M0.1.6** ✅ Config gráfica via WMI: ambas GPUs `Status: OK` (Intel Arc Pro + NVIDIA RTX 3000 Ada). **MUXless confirmado** — opção `Discrete Graphics` não existe no BIOS Setup
+- **M0.1.6.1** ✅ (sub-passo emergente) Anomalia `BootMode = Diagnostics` (provável side-effect do flash da BIOS) corrigida no BIOS Setup pra `Auto`/`UEFI`
+- **M0.1.7** ✅ Settings de virtualização e segurança coletados (sem reboot adicional): VT-x, VT-d, TPM, Secure Boot — todos no estado certo
+
+**Achados que viraram entrada permanente no STATE.md:**
+
+- Mapa real dos discos (UMIS=Linux, BIWIN=Windows, SSK USB=ignorar)
+- Hyper-V/VBS ativo (Windows 11 Pro Workstation 25H2)
+- Memory Integrity bloqueia ferramentas de firmware GPU — desabilitar temporariamente, reabilitar depois
+- P16v Gen 2 é MUXless (sem opção Discrete no BIOS)
+- Cada NVMe interno tem sua própria ESP (UMIS 2GB, BIWIN 4GB) — robustez de dual boot
+- D: NTFS de 2TB no BIWIN é staging compartilhado (D-013) — mount em M0.7
+
+**Documento de referência:** `docs/m0-windows-tweaks.md` (atualizado pra refletir o que foi REALMENTE executado, não o plano original)
 
 ### M0.2 — Coleta do estado atual no EndeavourOS
-- Bootar EndeavourOS atual
-- Coletar: `efibootmgr -v`, `lsblk -f`, `blkid`, `cat /etc/fstab`
-- Identificar onde está a EFI System Partition (provavelmente NVMe1)
+
+- Bootar EndeavourOS atual (F12, escolher entry do UMIS — Disk 0)
+- Coletar via terminal: `efibootmgr -v`, `lsblk -f`, `blkid`, `cat /etc/fstab`, `lspci -v`, `lscpu`, `inxi -Fxxxz`
+- Identificar layout exato da EFI System Partition (cada NVMe tem a sua, baseado em `Get-Partition`)
+- Validar quanto está ocupado de fato no Endeavour: `df -h` + `du -sh /home` (pra dimensionar clone em M0.3)
+- Confirmar topologia hybrid Meteor Lake (P-cores + E-cores + LP-cores) via `lscpu`
 - Documentar layout exato do disco
 - **Documento:** `m0-coleta-estado.md` (a ser criado quando chegar a hora)
 
 ### M0.3 — Clone do EndeavourOS via Macrium
+
+- **Pré-requisito:** plugar SSD externo dedicado (cenário (a) confirmado em D-007 atualizada). Primeira pergunta no M0.3 será tamanho/modelo do SSD
 - Bootar Ventoy → escolher Hiren's BootCD PE
 - Abrir Macrium Reflect
-- Clonar NVMe2 inteiro para destino externo (SSK 1 TB)
+- Clonar **Disk 0 (UMIS, ~1 TB)** inteiro para destino externo
 - Verificar integridade do clone
 - **Documento:** `m0-clone-endeavouros.md` (a ser criado quando chegar a hora)
 
 ### M0.4 — Instalação do Kubuntu 24.04 LTS
+
 - Bootar Ventoy → escolher Kubuntu 24.04 LTS
-- Particionamento manual no NVMe2:
-  - Reusar EFI System Partition existente (não reformatar!)
+- Particionamento manual no **Disk 0 (UMIS, NÃO BIWIN)**:
+  - Reusar EFI System Partition existente do UMIS (não reformatar!)
   - Criar partição BTRFS principal com subvolumes (@, @home, @log, @cache, etc.)
   - Sem swap em disco (vamos usar zram depois)
-- Bootloader: GRUB na ESP existente
+- Bootloader: GRUB na ESP do UMIS
 - Não criptografar (BitLocker do Windows é separado, criptografia adicional complica snapshots)
+- Confirmar pós-instalação: F12 mostra entries pra UMIS (Linux) E BIWIN (Windows Boot Manager) — duas rotas de boot independentes
 - **Documento:** `m0-instalar-kubuntu.md` (a ser criado quando chegar a hora)
 
 ### M0.5 — Pós-instalação imediata
+
 - Validar dual boot funcional (boot Windows e Kubuntu pelo GRUB)
 - Atualizar sistema (`apt update && apt full-upgrade`)
 - Instalar HWE kernel (`linux-generic-hwe-24.04`)
@@ -75,11 +107,27 @@
 - **Documento:** `m0-pos-instalacao.md` (a ser criado quando chegar a hora)
 
 ### M0.6 — Validação final
+
 - Testar reboot múltiplas vezes (Windows ↔ Kubuntu)
 - Tirar primeiro snapshot manual com Snapper
-- Validar que NVIDIA + Wayland funcionam (sem freezes)
+- Validar que NVIDIA + Wayland funcionam (sem freezes — ou X11 se Wayland NVIDIA der problema)
 - Confirmar que BTRFS está saudável (`btrfs filesystem usage /`)
 - **Documento:** `m0-validacao.md` (a ser criado quando chegar a hora)
+
+### M0.7 — Mount automático do D: NTFS (NOVO em D-013)
+
+> 📝 **Adicionado em 02/05/2026 (v5):** D-013 estabeleceu que D: NTFS no BIWIN será montado RW no Kubuntu como staging compartilhado. M0.7 é o sub-passo de execução.
+
+- Identificar UUID do D: via `blkid` (vai aparecer como NTFS)
+- Criar mount point: `sudo mkdir -p /mnt/data` (ou `/data` — decidir convenção)
+- Adicionar em `/etc/fstab`:
+  ```
+  UUID=<uuid-do-D:>  /mnt/data  ntfs3  defaults,nofail,uid=1000,gid=1000,umask=022,windows_names  0  0
+  ```
+- Testar: `sudo mount -a` (não deve dar erro)
+- Validar: `ls -la /mnt/data` (vai listar conteúdo do D: como o Windows vê)
+- Reboot pra confirmar que monta automaticamente
+- **Documento:** `m0-mount-d-ntfs.md` (a ser criado em M0.7)
 
 **Critério de "M0 concluído":**
 - ✅ Windows e Kubuntu bootam consistentemente pelo GRUB
@@ -87,6 +135,7 @@
 - ✅ Snapshot Snapper funcional
 - ✅ Sistema apto para uso diário básico (web, terminal, gerenciamento de arquivos)
 - ✅ Git, curl/wget, e descompactadores instalados
+- ✅ D: NTFS monta automaticamente em `/mnt/data` (M0.7)
 
 ---
 
@@ -202,6 +251,7 @@
 - **Power limit** via `nvidia-smi -pl` se houver thermal throttling em workload longo (ex: render Blender 1h+)
 - **KMS modeset** (`nvidia-drm.modeset=1`) — geralmente já é default no PPA `graphics-drivers` atual; validar
 - **PowerMizer mode:** `Adaptive` (default) vs `Maximum Performance` — só mudar se necessário, mata bateria
+- **Bug cosmético conhecido:** após flash da vBIOS no M0.1.5, `nvidia-smi` no Windows reportou `Pwr:Usage 364W / 55W` em idle (lixo de leitura, não impacta funcionalidade). Revalidar no Linux com driver NVIDIA novo.
 
 #### M1.10.6 — Gaming (overlap explícito com M1.2)
 - **MangoHud** + **GameMode** já estarão instalados em M1.2 — aqui só validar funcionamento e ajustar profiles
@@ -257,7 +307,7 @@
 
 ## M3 — Boot do Windows físico em VM (P2V live / Dual Reality)
 
-**Objetivo:** A mesma instalação Windows do NVMe1 boota em **bare metal** OU como VM dentro do Linux. Sem reinstalar Windows, sem duas licenças.
+**Objetivo:** A mesma instalação Windows do Disk 1 (BIWIN) boota em **bare metal** OU como VM dentro do Linux. Sem reinstalar Windows, sem duas licenças.
 
 **Sub-passos previstos:**
 
@@ -280,10 +330,12 @@
 - M4.1 — Validar IOMMU e isolation groups
 - M4.2 — Configurar VFIO + dynamic unbind/rebind da NVIDIA
 - M4.3 — Lidar com NVIDIA Code 43 (kvm=off, hidden=1)
-- M4.4 — Looking Glass para mostrar tela da VM em janela do Linux
+- M4.4 — Looking Glass para mostrar tela da VM em janela do Linux (**necessário em hardware MUXless** — confirmado em M0.1.6)
 - M4.5 — Scripts de "swap dance" (parar Plasma → subir VM → desligar VM → voltar Plasma)
 
 **Critério:** consigo lançar Windows com 95% de performance bare metal sob demanda, e voltar pro Linux sem reboot.
+
+> 📝 **Nota v5:** P16v Gen 2 confirmado **MUXless** em M0.1.6 — Looking Glass não é "alternativa nice-to-have", é **requisito** já que dGPU não tem saída de vídeo direta. Output da VM precisa passar pela iGPU pra chegar no display.
 
 ---
 
@@ -293,14 +345,16 @@
 
 **Sub-passos previstos:**
 
-- M5.1 — Validar que P16v Gen 2 é MUXed (provável)
+- M5.1 — ~~Validar que P16v Gen 2 é MUXed~~ → **Já confirmado em M0.1.6: P16v Gen 2 é MUXless.** Sub-passo se torna: **investigar limites do dual GPU em hardware MUXless** (dock TB4 pode dar saída separada à dGPU? saída via dock seria caminho)
 - M5.2 — Validar IOMMU groups com tudo conectado na dock
 - M5.3 — Configurar Linux para rodar na iGPU Intel Arc Pro
 - M5.4 — Passthrough permanente da NVIDIA pra VM Windows
-- M5.5 — Mapear monitores corretamente
+- M5.5 — Mapear monitores corretamente (com TB4 dock, possivelmente 1 saída direta da dGPU via dock, 1 da iGPU local)
 - M5.6 — Sem dock: fallback para M4 (single GPU swap)
 
 **Critério:** uso simultâneo, dois monitores, dois SOs, dois usos paralelos.
+
+> 📝 **Nota v5:** Em hardware MUXless puro sem dock, **dual passthrough simultâneo não é viável** (dGPU não tem caminho de saída independente). Com dock TB4, **pode ser** que a dock dê saída direta da NVIDIA — investigar em M5.1 quando chegarmos lá. Realisticamente, M5 pode terminar como "M4 + dock" se hardware não permitir.
 
 ---
 

@@ -2,16 +2,16 @@
 
 > 🧭 **Este é o GPS do projeto.** Ponto de entrada para qualquer chat novo (com IA ou colaborador humano). Sempre atualizado ao final de cada sessão de trabalho.
 >
-> **📅 Última atualização:** 02/05/2026 (v4: patch de privacidade no caminho local + adição do M1.10 de tuning de performance no roadmap)
-> **🔢 Versão do estado:** 4
+> **📅 Última atualização:** 02/05/2026 (v5: M0.1 CONCLUÍDO — Windows preparado para dual boot com BIOS atualizada, vBIOS NVIDIA atualizada com backup, mapa real de discos corrigido, MUXless confirmado, D-013 nova sobre D: NTFS, M0.7 novo)
+> **🔢 Versão do estado:** 5
 > **🎯 Milestone atual:** M0 — Setup base do dual boot
-> **📍 Sub-passo atual:** Pronto para iniciar M0.1
+> **📍 Sub-passo atual:** M0.1 ✅ concluído. Pronto para M0.2 (coleta de estado no EndeavourOS).
 
 ---
 
 ## 📌 Resumo executivo (1 parágrafo)
 
-Estamos no início da fase de execução do projeto. Toda a arquitetura foi decidida, todas as 8 decisões formais (D-001 a D-008) foram registradas, a estrutura do repositório foi criada, o repositório GitHub público está no ar (https://github.com/madlabnexus/workstation-ai-3d), Git e gh CLI foram instalados e autenticados no Windows. **Nada ainda foi tocado no hardware** — o dual boot Windows + EndeavourOS atual continua funcionando normalmente. **Próxima ação:** começar M0.1 — tweaks no Windows (desabilitar Fast Startup, verificar BitLocker, atualizar BIOS, anotar config gráficos).
+M0.1 fechado em sessão única no Windows. **Windows preparado para conviver com Linux:** Fast Startup desligado, hibernação desabilitada (24-32 GB liberados), BitLocker confirmado off em todos os volumes, BIOS atualizada (1.18 → 1.20), vBIOS NVIDIA atualizada (.01 → .1c) com backup salvo. **Mapa real do hardware descoberto** (era invertido no STATE v4). **Hardware classificado MUXless** (sem opção Discrete Graphics no BIOS). **Próxima ação:** M0.2 — bootar EndeavourOS atual e coletar estado real (efibootmgr, lsblk, blkid, fstab) antes de qualquer mudança destrutiva.
 
 ---
 
@@ -39,100 +39,144 @@ Estamos no início da fase de execução do projeto. Toda a arquitetura foi deci
 - [x] Estrutura do projeto criada localmente (8 arquivos)
 - [x] Git instalado no Windows: `git version 2.54.0.windows.1`
 - [x] GitHub CLI instalado: `gh version 2.92.0 (2026-04-28)`
-- [x] Configuração global do Git aplicada:
-  - `user.name=madlabnexus`
-  - `user.email=182696892+madlabnexus@users.noreply.github.com`
-  - `init.defaultBranch=main`
-  - `pull.rebase=false`
-- [x] Privacidade GitHub ativada (`Keep my email private` + `Block command line pushes`)
-- [x] PAT criado (note: `gh-cli-thinkpad-p16v`, scopes: `repo`, `workflow`, `read:org`, `read:user`, `gist`)
-- [x] `gh auth login` concluído via PAT — `Logged in as madlabnexus`
-- [x] Repo `workstation-ai-3d` (raiz local: `C:\Users\<user>\repos\workstation-ai-3d`)
-- [x] Primeiro commit: hash `6544717`, 8 arquivos, 1.421 insertions
+- [x] Configuração global do Git aplicada
+- [x] Privacidade GitHub ativada
+- [x] PAT criado e `gh auth login` concluído — `Logged in as madlabnexus`
+- [x] Repo `workstation-ai-3d` criado e push inicial feito
 - [x] Push para GitHub: https://github.com/madlabnexus/workstation-ai-3d (público)
 
-### Fase de início da execução (em andamento)
+### Fase de execução M0.1 (concluída em 02/05/2026 — esta sessão)
 
-- [x] Sessão de retomada via chat novo: STATE/decisoes/milestones lidos e confirmados
-- [x] Distro Kubuntu 24.04 LTS reafirmada (D-001 mantida — decisão Nobara não reaberta)
-- [x] TODOs explícitos do usuário registrados nesta versão (Edge, emuladores, descompactação, Git Linux, DAW, dotfiles)
-- [x] `milestones.md` atualizado para incluir Edge (M1.1), descompactação+Git (M0.5) e nova seção M1.9 (emuladores)
-- [x] **Auditoria + cleanup de ADRs (02/05/2026, v3 do STATE):**
-  - D-008 atualizada: **Photoshop = só Windows** (sem tentativa via Wine); Krita/GIMP cobrem o casual em Linux
-  - **D-011 (backup pessoal) cancelada** — backup será ad-hoc via `rsync`/SSK quando necessário
-  - **D-012 (Adobe via Wine) cancelada** — coerente com D-008 atualizada
-  - `m0-windows-tweaks.md`: corrigido "4 ajustes" → "5 ajustes"
-  - `README.md`: STATE.md adicionado na estrutura e na ordem de leitura
-  - **Convenção de naming PK↔repo documentada** (ver seção dedicada abaixo)
-- [x] **Patch v4 (02/05/2026):**
-  - **Privacidade:** removido username Windows local do mapa de arquivos (substituído por placeholder `<user>`) — STATE.md fica seguro para leitor público sem perder estrutura informativa
-  - **Roadmap:** adicionado **M1.10 — Tuning de performance** em `milestones.md`. Não bloqueador de "M1 concluído", marcado para execução **após 2+ semanas de uso real** do sistema. Cobre energia/térmico, CPU scheduler, memória/swap, NVMe, NVIDIA, gaming, e seção experimental opcional (undervolting, mitigations=off, custom kernel) com warnings explícitos.
+**Sequência real executada (com sub-passos M0.1.x adicionais que emergiram na execução):**
+
+- [x] **M0.1.1** — PowerShell aberto como administrador, validado com `IsInRole(Administrator) = True`
+- [x] **M0.1.2** — `powercfg /h off` executado (desabilita Fast Startup + Hibernação juntos, libera ~24-32 GB do `hiberfil.sys`)
+- [x] **M0.1.3** — `powercfg /a` confirmou: Hibernate/Fast Startup/Hybrid Sleep todos em "not available" com razão `"Hibernation has not been enabled"`. Modern Standby (S0 Low Power Idle) ativo, S3 não suportado pelo firmware (esperado em Meteor Lake). **Achado:** Hyper-V/VBS detectado ativo (`The hypervisor does not support this standby state` no Hybrid Sleep)
+- [x] **M0.1.4** — `manage-bde -status` confirmou BitLocker **OFF** em todos os volumes (C:, D:, E:, VTOYEFI, F:). Sem ação de suspender necessária
+- [x] **M0.1.4.1 (sub-passo emergente)** — Mapa real dos discos via `Get-Partition` + `Get-Disk`: descoberto que STATE v4 estava com NVMe1/NVMe2 invertidos. Mapa correto: **Disk 0 (UMIS) = Linux**, **Disk 1 (BIWIN) = Windows + D:**, **Disk 2 (SSK USB) = Ventoy + F: (ignorar)**
+- [x] **M0.1.5.1** — Versão BIOS atual confirmada via `Get-CimInstance Win32_BIOS`: `N44ET35W v1.18`, release 27/08/2025. Bate com `p16v.LOG`
+- [x] **M0.1.5.2** — vBIOS NVIDIA atual obtida via `nvidia-smi`: `95.06.31.40.01`, driver `595.71`. Subsystem ID `17AA-232D` (Lenovo P16v Gen 2 com RTX 3000 Ada)
+- [x] **M0.1.5.3.A** — Flash da BIOS principal: pacote `n44uj11w` (UEFI 1.20 + ECP 1.10) baixado e executado como admin. Memory training ~2 min após reboot. Validado pós-flash: **`N44ET37W v1.20`**, release 10/12/2025
+- [x] **M0.1.5.3.B (sub-passo emergente)** — Backup da vBIOS NVIDIA antes do flash. Memory Integrity (HVCI) precisou ser desligado pra `nvflash64` funcionar (depois reativado). Comando: `nvflash64.exe --index=0 --protectoff` seguido de `nvflash64.exe --index=0 --save vbios-p16v_bkp-95.06.31.40.01.rom`. Arquivo de 2.048.000 bytes salvo e copiado pra `C:\Users\<user>\bkp-bios\`
+- [x] **M0.1.5.3.C** — Flash da vBIOS NVIDIA: pacote `n44vw02w_v3` executado. Validado: **`95.06.31.40.1c`** (mesma família/major/sub-vendor/ROM, apenas patch level subiu `.01 → .1c` em hex)
+- [x] **M0.1.6** — Config gráfica coletada: ambas GPUs em `Status: OK` (Intel Arc Pro `8086:7D55` + NVIDIA `10DE:2838`), confirma Hybrid Graphics ativo. **Achado:** P16v Gen 2 é **MUXless** — verificação visual no BIOS Setup confirmou que opção `Discrete Graphics` **não existe** (só Hybrid)
+- [x] **M0.1.6.1 (sub-passo emergente)** — Anomalia detectada via WMI: `BootMode = Diagnostics` (provável side-effect do flash da BIOS). Corrigido manualmente no BIOS Setup pra `Auto`/`UEFI`
+- [x] **M0.1.7** — Settings de virtualização e segurança coletados via WMI Lenovo (sem reboot adicional): `VirtualizationTechnology = Enable` (VT-x ✅), `VTdFeature = Enable` (VT-d ✅), `SecurityChip = Enable` (TPM ✅), `SecureBoot = Disable` ✅
+- [x] **D-013 nova** — D: NTFS como staging RW compartilhado entre Windows ↔ Linux, mount automático no Kubuntu via fstab (executar em M0.7)
+- [x] **M0.7 novo** adicionado ao roadmap — configurar mount automático do D: NTFS no Kubuntu
 
 ---
 
 ## 🎯 Próximo passo concreto
 
-**M0.1 — Tweaks no Windows** (documento: `docs/m0-windows-tweaks.md`)
+**M0.2 — Coleta do estado atual no EndeavourOS** (documento `m0-coleta-estado.md` a ser criado quando chegar a hora)
 
-Sequência:
-1. Abrir PowerShell como administrador
-2. Rodar `powercfg /h off` (desabilita Fast Startup + Hibernação de uma vez)
-3. Validar com `powercfg /a`
-4. Rodar `manage-bde -status` (verificar BitLocker)
-5. Se BitLocker ativo: salvar chave de recuperação + suspender com `manage-bde -protectors -disable C:`
-6. Abrir Lenovo Vantage → verificar atualização de BIOS (atual: N44ET35W v1.18)
-7. Reboot → entrar na BIOS (F1) → anotar (não mudar): config gráfica, Secure Boot, VT-x, VT-d, TPM
-8. Reportar tudo de volta para iniciar M0.2 (coleta de estado do EndeavourOS)
+Sequência prevista:
+
+1. Bootar EndeavourOS atual (atalho F12 no boot Lenovo, escolher entry do UMIS — Disk 0)
+2. Abrir terminal e coletar estado real (cada comando vai pro cheatsheet):
+   - `efibootmgr -v` — entries UEFI atuais
+   - `lsblk -f` — layout completo de discos com filesystems
+   - `blkid` — UUIDs e tipos de partição
+   - `cat /etc/fstab` — montagem atual configurada no Endeavour
+   - `lspci -v` — confirma classificação de PCI devices vs Windows
+   - `lscpu` — confirma topologia hybrid (P-cores + E-cores + LP-cores)
+   - `inxi -Fxxxz` — overview saneado
+3. Documentar layout exato da EFI System Partition (provavelmente compartilhada no BIWIN ou separada no UMIS — cada NVMe parece ter sua própria ESP, baseado em `Get-Partition`)
+4. Validar quanto está ocupado de fato no Endeavour (`df -h` + `du -sh /home`) pra dimensionar tamanho do clone em M0.3
+5. Reportar tudo de volta para iniciar M0.3 (clone via Macrium)
 
 ---
 
 ## 🔖 TODOs explícitos do usuário (a slotar em milestones)
 
-Requisitos declarados pelo usuário na abertura do projeto que precisavam ser registrados explicitamente para não esquecer durante a execução. Já foram refletidos em `milestones.md`:
+Requisitos declarados pelo usuário na abertura do projeto que precisam ser registrados explicitamente para não esquecer durante a execução. Já refletidos em `milestones.md`:
 
 - [ ] **Microsoft Edge para Office 365** → entra em **M1.1** (apps essenciais). Build oficial Edge for Linux disponível como `.deb` direto da Microsoft.
-- [ ] **Emuladores (retro, DOS, Windows antigo)** → **M1.9** (nova seção): RetroArch (consoles retro), DOSBox-Staging (DOS), 86Box ou PCem (PC antigo até Pentium III), QEMU desktop para Win98/XP isolados.
+- [ ] **Emuladores (retro, DOS, Windows antigo)** → **M1.9**: RetroArch, DOSBox-Staging, 86Box ou PCem, QEMU desktop para Win98/XP.
 - [ ] **DAW para gravação de música** → **D-010 pendente** (Reaper proprietário vs Ardour open source). Decidir antes de M1.6.
-- [ ] **Ferramentas de descompactação** (zip, rar, 7z, tar, gz, zstd, xz) → entra em **M0.5** (pós-instalação) via `p7zip-full`, `unrar`, `unzip`, `zstd`, `xz-utils`.
+- [ ] **Ferramentas de descompactação** → entra em **M0.5** via `p7zip-full`, `unrar`, `unzip`, `zstd`, `xz-utils`.
 - [ ] **Git no Linux** → entra em **M0.5** (no Windows já está, falta replicar).
 - [ ] **Dotfiles auto-reinstaláveis** → **D-009 pendente** (chezmoi vs GNU Stow vs custom). Decidir antes de M1.5.
-- [ ] **Bootstrap script idempotente** → já previsto em **M1.4**. Vai consumir os TODOs acima como "lista mestra de pacotes".
+- [ ] **Bootstrap script idempotente** → previsto em **M1.4**.
+- [ ] **D: NTFS como staging compartilhado** → mount automático em **M0.7** (novo).
 
 ---
 
 ## 🧠 Contexto crítico para retomar
 
-### Sobre o estado real da máquina
+### Estado real da máquina (corrigido na v5 — ATENÇÃO: era invertido na v4!)
 
-- **NVMe1** (UMIS 1 TB) → Windows 11 Pro Workstation 25H2, **funcionando**, **NÃO tocar**
-- **NVMe2** (BIWIN 4 TB) → EndeavourOS, **funcionando**, **será substituído** por Kubuntu
-- **Dual boot atual** → systemd-boot, **funcionando perfeitamente**, ambos os SOs bootam normal
-- **EFI partition** → ainda **não investigada**, será feito no M0.2 via boot do EndeavourOS
+| Disco físico | Modelo | Tamanho | Bus | Conteúdo atual |
+|---|---|---|---|---|
+| **Disk 0** | UMIS RPETJ1T24MKP2QDQ | ~1.02 TB | NVMe interno | **🐧 EndeavourOS** (será substituído por Kubuntu em M0.4) |
+| **Disk 1** | BIWIN NV7400 4TB | ~4.10 TB | NVMe interno | **🪟 Windows 11 (C:) + Data NTFS (D:)** — não tocar |
+| **Disk 2** | SSK Portable SSD 1TB | ~1.02 TB | USB externo | **Ventoy (E:) + bkpunvsal (F:)** — pendrive de boot, ignorar |
+
+**Particionamento detalhado:**
+
+- **Disk 0 (UMIS, Linux):** EFI 2GB + root Linux 918GB + swap 33.9GB
+- **Disk 1 (BIWIN, Windows):** MSR 16MB + C:Windows 1.81TB + EFI 4GB + Recovery 735MB + D:Data 2.00TB
+- **Disk 2 (SSK USB):** E:Ventoy 454GB + VTOYEFI 32MB + F:bkpunvsal 500GB
+
+**Implicação pro projeto:**
+- Quando M0.6 (instalar Kubuntu), **alvo é o UMIS (Disk 0)**, não o BIWIN
+- Cada NVMe interno tem sua própria ESP — robusto: se GRUB der pau, F12 boota Windows direto via ESP do BIWIN
+- D: NTFS de 2TB é staging compartilhado (D-013 nova) — montar via fstab em M0.7
+- SSD externo dedicado pro M0.3 (clone Endeavour) **ainda não plugado** — primeira pergunta no M0.3 vai ser tamanho/modelo dele
+
+### Estado real do BIOS/firmware (após M0.1)
+
+| Componente | Antes | Depois (v5) |
+|---|---|---|
+| BIOS principal | `N44ET35W v1.18` (27/08/2025) | **`N44ET37W v1.20`** (10/12/2025) |
+| ECP (Embedded Controller) | desconhecido | v1.10 (junto com BIOS principal) |
+| vBIOS NVIDIA | `95.06.31.40.01` (Build 30/08/2023, Mod 19/02/2024) | **`95.06.31.40.1c`** |
+| Driver NVIDIA Windows | `595.71` | `595.71` (não tocado) |
+| BootMode | `Diagnostics` (side-effect do flash) | **`Auto`/`UEFI`** (corrigido) |
+
+**Configuração gráfica confirmada (M0.1.6):**
+- Hybrid Graphics ativo (Intel Arc Pro Graphics + NVIDIA RTX 3000 Ada)
+- **MUXless** — opção `Discrete Graphics` não existe no BIOS Setup
+- Implicação Linux: usar PRIME render offload ou envycontrol pra alternar dGPU
+- Implicação M4-M5: GPU passthrough sem display dedicado, vai requerer Looking Glass / Sunshine / rede
+
+**Settings de segurança/virtualização (M0.1.7):**
+
+| Setting | Valor | OK? |
+|---|---|---|
+| `SecureBoot` | Disable | ✅ pré-req Kubuntu sem dor de signed kernel |
+| `VirtualizationTechnology` (VT-x) | Enable | ✅ pré-req M2 |
+| `VTdFeature` (VT-d) | Enable | ✅ pré-req M4-M5 |
+| `SecurityChip` (TPM 2.0) | Enable | ✅ |
+| `KernelDMAProtection` | Disable | ✅ Linux gerencia IOMMU |
+| `TotalMemoryEncryption` | Disable | ✅ TME ligado quebra hibernate Linux |
+| `BootOrder` | NVMe0 (UMIS=Linux) primeiro | ✅ |
 
 ### Decisões que mudaram durante o planejamento (importante para não confundir)
 
-- **Distro:** mudei de Nobara → Fedora → Kubuntu 24.04 LTS (decisão final, reafirmada no chat de 02/05)
+- **Distro:** Nobara → Fedora → Kubuntu 24.04 LTS (decisão final, mantida)
 - **Backup do Windows:** plano original tinha; decisão final é **NÃO fazer**
-- **Mexer no Windows:** plano final permite tweaks (Fast Startup off etc) **mas sem backup**
 - **Bootloader:** systemd-boot atual será substituído por **GRUB** (decisão por simplicidade)
 - **Hiren's BootCD:** já está no Ventoy junto com Kubuntu LTS — **pendrive pronto**
+- **D: NTFS:** novo requisito (D-013) — staging compartilhado RW, mount automático em M0.7
+- **MUXless confirmado:** anteriormente assumido "MUXed provavelmente" no glossário e milestones; agora é fato. Implica em retrabalho cosmético em M5.1 e referências do glossário (não bloqueia avanço)
 
 ### Premissas operacionais
 
 - **Modo de trabalho:** um comando por vez, esperar output, validar, próximo passo
 - **Documentação:** "passo a passo para criança" — sem assumir conhecimento técnico
-- **Cada comando rodado real** vira entrada no `cheatsheet/README.md`
+- **Cada comando rodado real** vira entrada no `cheatsheet/README.md` (em batch ao final da sessão)
 - **Cada decisão importante** vira ADR em `docs/decisoes.md` (D-XXX)
 - **Identidade pública:** `madlabnexus` em qualquer arquivo público; **nome real do usuário NÃO entra em arquivos públicos**
 
 ### Coisas que ainda NÃO temos certeza (descobrir conforme avança)
 
-- Layout exato da EFI System Partition (NVMe1 ou NVMe2? compartilhada?)
+- Layout exato da EFI System Partition: cada NVMe tem a sua, mas qual o GRUB vai usar no M0.4 — vamos descobrir em M0.2
 - Versão atual do EndeavourOS instalado
 - O que existe de relevante no EndeavourOS atual (vai ser apagado — clone é só backup)
-- Se há atualização de BIOS Lenovo mais nova que v1.18
-- Status do BitLocker no Windows (ativo ou não)
-- Se o P16v Gen 2 é MUXed ou MUXless (importante para milestones M4-M5)
+- Tamanho/modelo do SSD externo destinado ao clone (M0.3)
+- Anomalia cosmética do `nvidia-smi` reportando `Pwr:Usage 364W / 55W` em idle (provável bug de driver vs vBIOS nova; não impacta funcionalidade; pode resolver com driver mais novo no Linux)
 
 ---
 
@@ -142,11 +186,11 @@ Requisitos declarados pelo usuário na abertura do projeto que precisavam ser re
 |---|---|---|
 | `STATE.md` | **Este arquivo.** GPS do projeto | Sempre, primeiro |
 | `README.md` | Visão geral do projeto | Para ter mapa mental |
-| `docs/decisoes.md` | 8 decisões formais com justificativas | Antes de questionar uma escolha |
+| `docs/decisoes.md` | 13 decisões formais com justificativas (D-013 nova) | Antes de questionar uma escolha |
 | `docs/milestones.md` | Roadmap M0-M5 e sub-passos | Para entender direção |
-| `docs/glossario.md` | ~150 termos técnicos | Quando aparecer termo desconhecido |
-| `docs/m0-windows-tweaks.md` | Sub-passo M0.1 detalhado | Durante execução do M0.1 |
-| `cheatsheet/README.md` | Comandos validados | Quando esquecer comando que já rodamos |
+| `docs/glossario.md` | ~160 termos técnicos | Quando aparecer termo desconhecido |
+| `docs/m0-windows-tweaks.md` | Sub-passo M0.1 detalhado (concluído, agora histórico/referência) | Pra reinstalação futura |
+| `cheatsheet/README.md` | Comandos validados (todos os do M0.1 + futuros) | Quando esquecer comando que já rodamos |
 | `p16v.LOG` | Especificações exatas do hardware | Para discussões de hardware |
 
 ---
@@ -167,8 +211,6 @@ A IA vai automaticamente:
 3. Confirmar contigo o próximo passo
 4. Esperar sua ordem para prosseguir
 
-Sem isso, a IA pode acabar refazendo decisões já tomadas ou pulando contexto importante.
-
 ---
 
 ## 🗂️ Convenção de nomes (project knowledge ↔ repositório GitHub)
@@ -184,10 +226,9 @@ O **project knowledge** do Claude não permite nomes de arquivo duplicados (não
 | `milestones.md` | `docs/milestones.md` | Roadmap |
 | `glossario.md` | `docs/glossario.md` | Glossário |
 | `m0-windows-tweaks.md` | `docs/m0-windows-tweaks.md` | Doc do M0.1 |
-| `p16v.LOG` | `p16v.LOG` (ou pasta `hardware/`) | Log HWiNFO |
+| `p16v.LOG` | `p16v.LOG` | Log HWiNFO |
 
 **Regra prática ao editar:**
-
 - **Para subir no PK do Claude:** usar o nome com sufixo (`README-projeto.md`, `README-cheatsheet.md`).
 - **Para commitar no repo GitHub:** usar o caminho com pasta (`README.md`, `cheatsheet/README.md`, `docs/...`).
 - **Os arquivos com sufixo são SOMENTE convenção do PK.** Em qualquer link, citação ou comando, sempre referenciar pelo nome no repositório.
@@ -199,9 +240,9 @@ O **project knowledge** do Claude não permite nomes de arquivo duplicados (não
 **Quando atualizar:**
 
 - ✅ Ao concluir um sub-passo de milestone (`M0.1` → `M0.2`)
-- ✅ Ao tomar decisão nova (D-009, D-010...)
+- ✅ Ao tomar decisão nova (D-009, D-010, D-013...)
 - ✅ Ao descobrir gotcha importante durante execução
-- ✅ Ao mudar de plano (raro, mas acontece — vide histórico de mudanças de distro)
+- ✅ Ao mudar de plano (raro, mas acontece — vide histórico de mudanças de distro e mapa de discos)
 
 **Como atualizar:**
 
@@ -212,6 +253,6 @@ O **project knowledge** do Claude não permite nomes de arquivo duplicados (não
 5. Atualizar "Próximo passo concreto"
 6. Revisar "Contexto crítico" (remover o que não é mais relevante, adicionar novidades)
 7. `git add STATE.md && git commit -m "STATE: <resumo da mudança>" && git push`
-8. **Re-upload** no Project Knowledge do Claude (ou conectar GitHub MCP — ver abaixo)
+8. **Re-upload** no Project Knowledge do Claude
 
 **Princípio:** este arquivo deve **caber em uma tela** ao ler em terminal. Se ficou grande demais, mover detalhes históricos para `decisoes.md` ou `milestones.md`.

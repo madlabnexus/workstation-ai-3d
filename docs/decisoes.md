@@ -66,7 +66,9 @@ O usuário precisa rodar Photoshop, After Effects, 3ds Max, SolidWorks e AutoCAD
 4. **Linux only com alternativas open** — exige mudar workflow profissional
 
 ### Decisão
-**Dual boot tradicional**, com **Windows como primário** inicialmente. Linux secundário no NVMe2 (que hoje tem EndeavourOS).
+**Dual boot tradicional**, com **Windows como primário** inicialmente. Linux secundário no Disk 0 (UMIS, que hoje tem EndeavourOS).
+
+> 📝 **Nota v5 (02/05/2026):** O texto anterior dizia "NVMe2"; corrigido para "Disk 0 (UMIS)" após descoberta do mapa real dos discos no M0.1.4.1. UMIS é o NVMe interno menor (1 TB) onde está o EndeavourOS. BIWIN (4 TB) é onde está o Windows + D:.
 
 ### Justificativa
 - **Adobe + Autodesk são profissionais e diários** — performance bare metal é não-negociável
@@ -75,9 +77,9 @@ O usuário precisa rodar Photoshop, After Effects, 3ds Max, SolidWorks e AutoCAD
 - **Caminho de migração futura existe:** plano é, eventualmente, mover Windows para uma VM no servidor TD350 com GPU passthrough da 4090
 
 ### Consequências
-- Precisa de pasta NTFS compartilhada para arquivos entre os dois sistemas
+- Precisa de pasta NTFS compartilhada para arquivos entre os dois sistemas → **endereçado em D-013 (D: como staging RW)**
 - Reboot necessário para alternar — aceitável dado uso ocasional do Linux inicialmente
-- Windows não vai ser tocado durante a instalação (só configurações leves: Fast Startup off etc)
+- Windows não vai ser tocado durante a instalação (só configurações leves: Fast Startup off etc, executadas em M0.1)
 
 ---
 
@@ -116,7 +118,7 @@ Servidor Lenovo TD350 com 2× Xeon E5, 512 GB RAM e RTX 4090 (24 GB) será usado
 **Status:** ✅ Decidido
 
 ### Contexto
-O notebook atualmente tem dual boot Windows + EndeavourOS gerenciado por **systemd-boot**, funcionando normalmente. Quando instalarmos o Kubuntu (que vai substituir o EndeavourOS no NVMe2), o instalador padrão usa GRUB.
+O notebook atualmente tem dual boot Windows + EndeavourOS gerenciado por **systemd-boot**, funcionando normalmente. Quando instalarmos o Kubuntu (que vai substituir o EndeavourOS no Disk 0/UMIS), o instalador padrão usa GRUB.
 
 ### Opções consideradas
 
@@ -134,8 +136,8 @@ O notebook atualmente tem dual boot Windows + EndeavourOS gerenciado por **syste
 - O EndeavourOS atual será **descartado** (clone de segurança feito antes), então as entries dele do systemd-boot são irrelevantes
 
 ### Consequências
-- Instalador Kubuntu vai escrever GRUB na EFI System Partition existente (a do Windows)
-- Instalador adicionará pasta `/EFI/ubuntu/` na ESP, mantendo `/EFI/Microsoft/` intacta
+- Instalador Kubuntu vai escrever GRUB na ESP do Disk 0 (UMIS — onde está o Linux atual)
+- Cada disco interno tem sua própria ESP (descoberto no M0.1.4.1): UMIS tem ESP 2GB, BIWIN tem ESP 4GB. Isso é robusto: se GRUB der pau, F12 boota Windows direto via ESP do BIWIN
 - Windows continua bootável via menu GRUB
 
 ---
@@ -177,15 +179,15 @@ Um dos requisitos do projeto é "se eu precisar formatar o ROOT não perco nenhu
 **Status:** ✅ Decidido
 
 ### Contexto
-Plano original incluía backup completo da instalação Windows no NVMe1 antes de mexer no NVMe2 (onde está o EndeavourOS, que será substituído por Kubuntu).
+Plano original incluía backup completo da instalação Windows antes de mexer no disco do Linux.
 
 ### Decisão
 **Não fazer backup do Windows.** O usuário considera o risco aceitável.
 
 ### Justificativa
-- A instalação do Kubuntu vai mexer **apenas no NVMe2**
-- A EFI partition compartilhada terá uma pasta nova adicionada (`/EFI/ubuntu/`), sem mexer na pasta `/EFI/Microsoft/`
-- Se algo der errado e o GRUB sobrescrever o boot Windows, é recuperável via Windows recovery
+- A instalação do Kubuntu vai mexer **apenas no Disk 0 (UMIS)** — disco do Linux atual
+- O Disk 1 (BIWIN — Windows + D:) não será tocado em nenhum momento
+- Cada disco tem sua própria ESP (descoberto em M0.1.4.1): GRUB vai escrever na ESP do UMIS, ESP do BIWIN fica intacta. Plano B grátis: se GRUB der pau, F12 boota Windows direto via ESP do BIWIN
 - Decisão consciente do usuário
 
 ### Consequências
@@ -200,10 +202,12 @@ Plano original incluía backup completo da instalação Windows no NVMe1 antes d
 **Status:** ✅ Decidido
 
 ### Contexto
-O NVMe2 tem EndeavourOS funcional. Será substituído pelo Kubuntu, mas é boa prática preservar a instalação caso queira reverter.
+O Disk 0 (UMIS, 1 TB) tem EndeavourOS funcional. Será substituído pelo Kubuntu, mas é boa prática preservar a instalação caso queira reverter.
 
 ### Decisão
-**Clonar o NVMe2 (EndeavourOS) com Macrium Reflect**, executado a partir do **Hiren's BootCD PE**, lido via **Ventoy**.
+**Clonar o Disk 0 (EndeavourOS) com Macrium Reflect**, executado a partir do **Hiren's BootCD PE**, lido via **Ventoy**. Destino do clone = SSD externo dedicado **ainda não plugado** (cenário (a) confirmado pelo usuário).
+
+> 📝 **Nota v5 (02/05/2026):** anteriormente texto dizia "NVMe2" e mencionava "SSK 1 TB externo" como candidato a destino. Corrigido após M0.1.4.1: a fonte é **Disk 0 (UMIS)**, e o destino é um **SSD externo separado, ainda não plugado** (não o SSK que está no Ventoy).
 
 ### Justificativa
 - Macrium Reflect Free foi descontinuado em jan/2024, **mas continua funcional em quem já tem** ou em ambientes Hiren's PE que vêm com ele incluso
@@ -211,8 +215,9 @@ O NVMe2 tem EndeavourOS funcional. Será substituído pelo Kubuntu, mas é boa p
 - Ventoy permite ter múltiplas ISOs no mesmo pendrive (Hiren + Kubuntu) e escolher na hora do boot
 
 ### Consequências
-- Precisa destino para o clone (SSK 1TB externo é candidato natural)
-- Tempo de clone depende do tamanho real ocupado no NVMe2 (não dos 4 TB totais)
+- Precisa destino para o clone — SSD externo dedicado a ser plugado quando chegar M0.3
+- Tempo de clone depende do tamanho real ocupado no UMIS (não dos 1 TB totais) — coletar `df -h` em M0.2 antes
+- SSK USB (Disk 2) é apenas o pendrive Ventoy de boot, **não** o destino do clone
 
 ---
 
@@ -248,6 +253,65 @@ Tempo gasto tentando rodar After Effects, SolidWorks, 3ds Max ou Photoshop via W
 
 ---
 
+## D-013 — D: NTFS como staging RW compartilhado entre Windows e Linux
+
+**Data:** 02/05/2026
+**Status:** ✅ Decidido (executar em M0.7)
+
+### Contexto
+Durante o M0.1.4.1 foi descoberto que o Disk 1 (BIWIN, 4 TB onde está o Windows) tem **2 partições**: C: (Windows, 1.81 TB) e D: (Data, 2.00 TB). O `D:` foi declarado pelo usuário como **partição de staging compartilhada** entre Windows e o futuro Kubuntu, com requisitos:
+
+- Acessível **read+write** dos dois sistemas
+- Sobrevive a reinstalação do Windows (formatar C: não toca D:)
+- Hospeda: backup, jogos, dados, documentos, projetos compartilhados
+
+Necessário endereçar formalmente porque nenhum dos 8 ADRs anteriores cobria esse requisito.
+
+### Opções consideradas
+
+1. **Manter D: NTFS, montar no Linux via fstab** — preserva acesso Windows nativo, Linux lê via driver `ntfs3` (kernel 5.15+)
+2. **Reformatar D: para ext4** — Linux nativo perfeito, mas Windows perde acesso (ou requer driver third-party `ext2fsd` instável)
+3. **Reformatar D: para exFAT** — ambos lêem nativamente, mas sem permissões/journaling, risco maior de corrupção
+4. **Criar duas partições novas (uma NTFS, uma ext4) divididas 50/50** — mais complexo, perde flexibilidade, exige reparticionar (intrusivo)
+
+### Decisão
+**Manter D: como NTFS, montagem automática RW no Kubuntu via fstab.** Sem restrições de conteúdo (decisão consciente do usuário, cenário previsto não envolve as armadilhas típicas).
+
+### Justificativa
+- **Único formato que preserva o requisito** "se reinstalar Windows, D: continua acessível pelo novo Windows sem reformatar"
+- **Linux moderno tem driver maduro** (`ntfs3` no kernel oficial desde 5.15)
+- **Fast Startup já desligado** no M0.1.2 — neutraliza a armadilha clássica de corrupção (montar NTFS hibernado)
+- **Limitações de NTFS via Linux** (sem UID/GID nativo, performance ~70-85% de ext4) **são aceitáveis pro caso de uso declarado**: assets, mídia, jogos — workload de leitura sequencial, onde NTFS via Linux funciona muito bem
+- **Sem reformatação** = zero risco de perda de dados durante setup do Kubuntu
+
+### Política de uso (informativa, não bloqueante)
+
+A tabela abaixo é referencial — usuário escolheu sem restrição formal de conteúdo, mas registramos as armadilhas conhecidas:
+
+| Tipo de conteúdo | Recomendado em D:? | Motivo |
+|---|---|---|
+| Assets de projeto (.blend, .psd, .uasset, .max, .skp) | ✅ | Leitura sequencial, sem dependência de UID/GID |
+| Mídia (vídeos, fotos, áudio) | ✅ | Mesmo motivo |
+| Bibliotecas Steam, Epic Games | ✅ | Esperado funcionar bem |
+| ROMs de emulador, ISOs | ✅ | Sem dependência de permissões UNIX |
+| Repos Git em desenvolvimento ativo | ⚠️ | NTFS confunde execute bit, hooks Git, simlinks. Manter em `~/repos` ou `C:\Users\<user>\repos` |
+| Ambientes virtuais Python / `node_modules` | ⚠️ | Performance ruim com I/O pequeno em massa |
+| Arquivos com permissões UNIX importantes | ⚠️ | NTFS não preserva |
+
+### Consequências
+
+- **M0.7 novo no roadmap** — sub-passo dedicado ao mount automático em fstab, executado **após** M0.6 (instalar Kubuntu) e antes de uso intensivo
+- **Configuração fstab planejada:** `defaults,nofail,uid=1000,gid=1000,umask=022,windows_names`
+  - `defaults` — set de flags padrão (rw,suid,dev,exec,auto,nouser,async)
+  - `nofail` — não trava boot se D: não estiver disponível
+  - `uid=1000,gid=1000` — todos arquivos pertencem ao primeiro usuário Linux (UID 1000 = primeiro usuário criado na instalação Kubuntu)
+  - `umask=022` — permissões 755 dirs / 644 files
+  - `windows_names` — bloqueia nomes Linux que Windows não conseguiria ler depois (caracteres `<>:"|?*`, terminar com ponto)
+- **Mount point sugerido:** `/mnt/data` ou `/data` (definir em M0.7)
+- **Sem backup formal de D:** D-011 (backup pessoal) está cancelada; backup será ad-hoc se necessário
+
+---
+
 ## Próximas decisões pendentes
 
 - **D-009:** Estratégia de dotfiles (chezmoi vs GNU Stow vs solução custom) — decidir antes de M1.5
@@ -260,7 +324,7 @@ Tempo gasto tentando rodar After Effects, SolidWorks, 3ds Max ou Photoshop via W
 > Para histórico — itens que **estavam** na lista de pendências mas foram retirados para não poluir o roadmap.
 
 - **D-011 — Estratégia de backup pessoal (rsync, restic, BorgBackup)**
-  Cancelada em 02/05/2026 a pedido do usuário. Será endereçada *ad-hoc* quando surgir necessidade real (provavelmente via `rsync` para o SSK externo ou pasta NTFS compartilhada). Não é objetivo formal do projeto.
+  Cancelada em 02/05/2026 a pedido do usuário. Será endereçada *ad-hoc* quando surgir necessidade real (provavelmente via `rsync` para o SSD externo ou pasta NTFS compartilhada). Não é objetivo formal do projeto.
 
 - **D-012 — Modelo de Adobe via Wine (PhialsBasement vs Bottles)**
   Cancelada em 02/05/2026 a pedido do usuário. Coerente com a atualização da D-008: Adobe = Windows. Sem tentativa de rodar Photoshop via Wine.
