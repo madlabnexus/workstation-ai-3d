@@ -2,8 +2,8 @@
 
 > 🧭 **Este é o GPS do projeto.** Ponto de entrada para qualquer chat novo (com IA ou colaborador humano). Sempre atualizado ao final de cada sessão de trabalho.
 >
-> **📅 Última atualização:** 02/05/2026 (auditoria + cleanup: D-008 fechada para Photoshop=Windows; D-011 e D-012 removidas; convenção de naming PK↔repo documentada)
-> **🔢 Versão do estado:** 3
+> **📅 Última atualização:** 02/05/2026 (v4: patch de privacidade no caminho local + adição do M1.10 de tuning de performance no roadmap)
+> **🔢 Versão do estado:** 4
 > **🎯 Milestone atual:** M0 — Setup base do dual boot
 > **📍 Sub-passo atual:** Pronto para iniciar M0.1
 
@@ -47,7 +47,7 @@ Estamos no início da fase de execução do projeto. Toda a arquitetura foi deci
 - [x] Privacidade GitHub ativada (`Keep my email private` + `Block command line pushes`)
 - [x] PAT criado (note: `gh-cli-thinkpad-p16v`, scopes: `repo`, `workflow`, `read:org`, `read:user`, `gist`)
 - [x] `gh auth login` concluído via PAT — `Logged in as madlabnexus`
-- [x] Repo `workstation-ai-3d` (raiz local: `C:\Users\gcarneiro\repos\workstation-ai-3d`)
+- [x] Repo `workstation-ai-3d` (raiz local: `C:\Users\<user>\repos\workstation-ai-3d`)
 - [x] Primeiro commit: hash `6544717`, 8 arquivos, 1.421 insertions
 - [x] Push para GitHub: https://github.com/madlabnexus/workstation-ai-3d (público)
 
@@ -64,6 +64,9 @@ Estamos no início da fase de execução do projeto. Toda a arquitetura foi deci
   - `m0-windows-tweaks.md`: corrigido "4 ajustes" → "5 ajustes"
   - `README.md`: STATE.md adicionado na estrutura e na ordem de leitura
   - **Convenção de naming PK↔repo documentada** (ver seção dedicada abaixo)
+- [x] **Patch v4 (02/05/2026):**
+  - **Privacidade:** removido username Windows local do mapa de arquivos (substituído por placeholder `<user>`) — STATE.md fica seguro para leitor público sem perder estrutura informativa
+  - **Roadmap:** adicionado **M1.10 — Tuning de performance** em `milestones.md`. Não bloqueador de "M1 concluído", marcado para execução **após 2+ semanas de uso real** do sistema. Cobre energia/térmico, CPU scheduler, memória/swap, NVMe, NVIDIA, gaming, e seção experimental opcional (undervolting, mitigations=off, custom kernel) com warnings explícitos.
 
 ---
 

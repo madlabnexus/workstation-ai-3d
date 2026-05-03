@@ -162,7 +162,80 @@
 - PPSSPP (PSP), Dolphin (GameCube/Wii), PCSX2 (PS2)
 - **Critério:** consigo rodar jogos das eras DOS, Win9x, PSX, PS2, retro consoles sem stress
 
-**Critério de "M1 concluído":** sistema reproduzível via script + dotfiles, uso confortável diariamente, todos os softwares essenciais instalados.
+### M1.10 — Tuning de performance (opcional, não-bloqueador)
+
+> ⚠️ **Quando executar:** apenas **após 2+ semanas de uso real** do sistema com M1.1-M1.9 estabilizados. Tuning prematuro é otimização sem baseline — você não sabe o que precisa melhorar até usar de verdade.
+
+**Objetivo:** Aproveitar características específicas do P16v Gen 2 (Meteor Lake hybrid cores, RTX 3000 Ada, 32GB DDR5, NVMe BIWIN 4TB) para workloads pesados (3D, IA local, gaming) **sem trocar estabilidade por benchmarks**.
+
+**Princípio operacional:**
+- Mudar **uma coisa por vez**, medir antes/depois (idealmente com benchmark real do workload, não synthetic puro)
+- Cada tuning aplicado vira **ADR** (D-XXX) com motivação + benchmark mensurado
+- Lista de coisas **testadas e descartadas** também vira ADR (evita reentrar no mesmo loop daqui a 6 meses)
+- Snapshot Snapper ANTES de cada tuning não-trivial — rollback imediato se quebrar algo
+
+**Sub-passos:**
+
+#### M1.10.1 — Energia e térmico (laptop-specific)
+- **TLP** vs **power-profiles-daemon** — decidir qual usar (cada um tem trade-offs em laptop ThinkPad). Vira ADR.
+- **thermald** já vem ativo no Ubuntu — só validar
+- **Profiles diferenciados:** bateria vs tomada vs dock Thunderbolt
+
+#### M1.10.2 — CPU scheduler e governor
+- **Intel P-State driver** — modo `passive` vs `active` (afeta como governor controla frequência)
+- **Governor:** `powersave` (default) vs `performance` vs `schedutil`. Em laptop moderno geralmente `schedutil` é o melhor compromisso.
+- **Hybrid scheduler do kernel:** já gerencia P-cores (6×) + E-cores (8×) + LPE-cores (2×) automaticamente. **Só intervir manualmente se houver problema mensurado** — não tunar profilaticamente.
+
+#### M1.10.3 — Memória e swap
+- **ZRAM** finalizado (configuração inicial vai em M0.4 — fechar otimização aqui)
+- **`vm.swappiness`** — default 60 do Ubuntu costuma ser alto demais para SSD/NVMe; 10-20 geralmente melhor
+- **`vm.vfs_cache_pressure`** — pode reduzir para manter mais cache em RAM
+- **Limite tmpfs** se workload usar `/tmp` intensivamente
+
+#### M1.10.4 — Storage NVMe
+- **I/O scheduler `none`** para NVMe (vs `mq-deadline` default — em NVMe modernos, scheduler em software só atrapalha; o controlador do disco já faz queue management)
+- **`fstrim.timer`** já vem ativo via systemd — validar
+- **Mount options BTRFS:** `noatime,compress=zstd:3,space_cache=v2` (provavelmente já aplicado em M0.4 — revisar)
+
+#### M1.10.5 — NVIDIA tuning
+- **`nvidia-persistenced`** ativo — reduz latência de cold-start CUDA, útil em IA local
+- **Power limit** via `nvidia-smi -pl` se houver thermal throttling em workload longo (ex: render Blender 1h+)
+- **KMS modeset** (`nvidia-drm.modeset=1`) — geralmente já é default no PPA `graphics-drivers` atual; validar
+- **PowerMizer mode:** `Adaptive` (default) vs `Maximum Performance` — só mudar se necessário, mata bateria
+
+#### M1.10.6 — Gaming (overlap explícito com M1.2)
+- **MangoHud** + **GameMode** já estarão instalados em M1.2 — aqui só validar funcionamento e ajustar profiles
+- **Não duplicar instalação** — referenciar M1.2
+
+#### M1.10.7 — Experimental / alto risco (OPCIONAL — documentado para registro)
+
+> 🚨 **ATENÇÃO:** tudo abaixo é "executar **só com motivação clara e benchmark de baseline**, e snapshot Snapper recente". Nenhum item é recomendado por padrão. Lista existe para que seja considerada conscientemente, não como sugestão a aplicar.
+
+- **Undervolting CPU** (`intel-undervolt`)
+  - **Pode:** reduzir 5-10°C, ganhar margem antes de thermal throttling em sustained loads
+  - **Risco:** voltagem errada → travamento aleatório, em casos extremos corrupção de dados
+  - **Quando faz sentido:** se houver thermal throttling mensurado em workload real (não synthetic)
+  - **Quando NÃO faz sentido:** só por status / "porque dá pra fazer"
+
+- **`mitigations=off` no kernel cmdline**
+  - **Pode:** ganhar 5-15% em workloads CPU-bound (especialmente compilação, IA com batch CPU)
+  - **Risco:** desliga proteções contra Spectre/Meltdown e variantes — máquina fica vulnerável a side-channel attacks
+  - **Quando faz sentido:** workstation isolada, sem código não-confiável rodando, sem browsing pesado/desconhecido
+  - **Quando NÃO faz sentido:** máquina de uso geral com browser aberto o dia todo
+
+- **Custom kernel** (Liquorix, XanMod, CachyOS-style patches)
+  - **Pode:** scheduler mais agressivo, latência menor em desktop interativo
+  - **Risco:** sai do suporte oficial do Ubuntu HWE — qualquer bug sério deixa de ter canal de fix
+  - **Quando faz sentido:** depois de testar HWE padrão por meses e ter problema específico não resolvido
+  - **Quando NÃO faz sentido:** "porque benchmarks na internet são melhores"
+
+**Critério de "M1.10 concluído":**
+- ✅ Cada tuning aplicado tem ADR documentando: motivação, comando exato, benchmark antes/depois (com workload real)
+- ✅ Lista de tunings descartados também documentada (com motivo do descarte)
+- ✅ Sistema mensurável melhor em **alguma** métrica relevante (responsividade, temperatura sustentada, autonomia em bateria, ou tempo de tarefa real específica)
+- ✅ Nenhum tuning aplicado em produção sem snapshot Snapper anterior
+
+**Critério de "M1 concluído":** sistema reproduzível via script + dotfiles, uso confortável diariamente, todos os softwares essenciais instalados. **M1.10 (tuning) é opcional e pode ser executado sob demanda após uso real — não bloqueia o avanço para M2.**
 
 ---
 
